@@ -126,6 +126,12 @@ def test_code(test_case):
     Re_z = rot_matrix_z(e3)
     r, p, y = euler_from_quaternion(test_case[0][1])
     Rrpy = (Re_z * Re_y * Re_x * R_corr).evalf(subs={e1: r, e2: p, e3: y})
+
+    # Wrist center
+    px, py, pz = test_case[0][0]
+    wx = px - (0 + 0.303)*Rrpy[0, 2]
+    wy = py - (0 + 0.303)*Rrpy[1, 2]
+    wz = pz - (0 + 0.303)*Rrpy[2, 2]
     
     theta1 = 0
     theta2 = 0
