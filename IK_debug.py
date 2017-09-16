@@ -107,18 +107,15 @@ def test_code(test_case):
     ## 
     ########################################################################################
     
-    ########################################################################################
-    ## For additional debugging add your forward kinematics here. Use your previously calculated thetas
-    ## as the input and output the position of your end effector as your_ee = [x,y,z]
+    WC = T0_5.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
+                          q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
 
-    ## (OPTIONAL) YOUR CODE HERE!
-
-    ## End your code input for forward kinematics here!
-    ########################################################################################
+    EE = T_total.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
+                             q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
 
     ## For error analysis please set the following variables of your WC location and EE location in the format of [x,y,z]
-    your_wc = [1,1,1] # <--- Load your calculated WC values in this array
-    your_ee = [1,1,1] # <--- Load your calculated end effector value from your forward kinematics
+    your_wc = [WC[0, 3], WC[1, 3], WC[2, 3]] # <--- Load your calculated WC values in this array
+    your_ee = [EE[0, 3], EE[1, 3], EE[2, 3]] # <--- Load your calculated end effector value from your forward kinematics
     ########################################################################################
 
     ## Error analysis
