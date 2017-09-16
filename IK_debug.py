@@ -34,6 +34,21 @@ def DH_transform_matrix(alpha, a, d, q):
                    [ sin(q)*sin(alpha), cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
                    [                 0,                 0,           0,             1]])
 
+def rot_matrix_x(theta):
+    return Matrix([[ 1,           0,           0         ],
+                   [ 0,           cos(theta), -sin(theta)],
+                   [ 0,           sin(theta),  cos(theta)]])
+
+def rot_matrix_y(theta):
+    return Matrix([[ cos(theta),  0,           sin(theta)],
+                   [ 0,           1,           0         ],
+                   [-sin(theta),  0,           cos(theta)]])
+
+def rot_matrix_z(theta):
+    return Matrix([[ cos(theta), -sin(theta),  0],
+                   [ sin(theta),  cos(theta),  0],
+                   [ 0,           0,           1]])
+
 def test_code(test_case):
     ## Set up code
     ## Do not modify!
@@ -98,13 +113,53 @@ def test_code(test_case):
     T0_5 = (T0_4 * T4_5) # base link to link 5
     T0_6 = (T0_5 * T5_6) # base link to link 6
     T_total = (T0_6 * T6_G) # base link to gripper
+
+    # Gripper orientation correction
+    R_z = rot_matrix_z(pi)
+    R_y = rot_matrix_y(-pi/2.)
+    R_corr = (R_z * R_y)
+
+    # Gripper final orientation
+    e1, e2, e3 = symbols('e1:4')
+    Re_x = rot_matrix_x(e1)
+    Re_y = rot_matrix_y(e2)
+    Re_z = rot_matrix_z(e3)
+    r, p, y = euler_from_quaternion(test_case[0][1])
+    Rrpy = (Re_z * Re_y * Re_x * R_corr).evalf(subs={e1: r, e2: p, e3: y})
+
+    # Wrist center
+    px, py, pz = test_case[0][0]
+    wx = px - (0 + 0.303)*Rrpy[0, 2]
+    wy = py - (0 + 0.303)*Rrpy[1, 2]
+    wz = pz - (0 + 0.303)*Rrpy[2, 2]
+
+    # Trig
+    wxy = sqrt(wx**2 + wy**2)
+    Bxy = wxy-0.35
+    Bz = wz-0.75
+    B = sqrt(Bxy**2 + Bz**2)
+    A = 1.50097     # sqrt(0.054**2 + 1.5**2)
+    C = 1.25
+    a = acos((B**2 + C**2 - A**2)/(2*B*C))
+    b = acos((A**2 + C**2 - B**2)/(2*A*C))
+    t3_offset = 0.03598     # atan(0.054/1.5)
     
-    theta1 = 0
-    theta2 = 0
-    theta3 = 0
-    theta4 = 0
-    theta5 = 0
-    theta6 = 0
+    theta1 = atan2(wy, wx)
+    theta2 = atan2(Bxy, Bz) - a
+    theta3 = pi/2. - b - t3_offset
+
+    # Extract rotation matrices from the transformation matrices
+    R0_3 = (T0_3[0:3, 0:3]).evalf(subs={q1: theta1, q2: theta2, q3: theta3})
+    # R3_6 = R0_3.inv() * Rrpy
+    R3_6 = R0_3.transpose() * Rrpy  # Note transpose equivalent and faster than inverse
+
+    # Comparison matrix
+    # R3_6_comp = simplify(T3_4[0:3, 0:3] * T4_5[0:3, 0:3] * T5_6[0:3, 0:3] * T6_G[0:3,0:3])
+    # print R3_6_comp
+
+    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+    theta5 = atan2(sqrt(R3_6[1,0]**2 + R3_6[1,1]**2), R3_6[1,2])
+    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
     ## 
     ########################################################################################
