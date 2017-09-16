@@ -148,9 +148,18 @@ def test_code(test_case):
     theta2 = atan2(Bxy, Bz) - a
     theta3 = pi/2. - b - t3_offset
 
-    theta4 = 0
-    theta5 = 0
-    theta6 = 0
+    # Extract rotation matrices from the transformation matrices
+    R0_3 = (T0_3[0:3, 0:3]).evalf(subs={q1: theta1, q2: theta2, q3: theta3})
+    # R3_6 = R0_3.inv() * Rrpy
+    R3_6 = R0_3.transpose() * Rrpy  # Note transpose equivalent and faster than inverse
+
+    # Comparison matrix
+    # R3_6_comp = simplify(T3_4[0:3, 0:3] * T4_5[0:3, 0:3] * T5_6[0:3, 0:3] * T6_G[0:3,0:3])
+    # print R3_6_comp
+
+    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+    theta5 = atan2(sqrt(R3_6[1,0]**2 + R3_6[1,1]**2), R3_6[1,2])
+    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
     ## 
     ########################################################################################
