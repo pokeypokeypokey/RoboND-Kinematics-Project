@@ -1,7 +1,9 @@
-from sympy import *
 from time import time
 from mpmath import radians
 import tf
+from tf.transformations import euler_from_quaternion
+from sympy import symbols, cos, acos, sin, asin, atan, atan2, sqrt, simplify, pi
+from sympy.matrices import Matrix
 
 '''
 Format of test case is [ [[EE position],[EE orientation as quaternions]],[WC location],[joint angles]]
