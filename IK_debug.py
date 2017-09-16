@@ -118,6 +118,14 @@ def test_code(test_case):
     R_z = rot_matrix_z(pi)
     R_y = rot_matrix_y(-pi/2.)
     R_corr = (R_z * R_y)
+
+    # Gripper final orientation
+    e1, e2, e3 = symbols('e1:4')
+    Re_x = rot_matrix_x(e1)
+    Re_y = rot_matrix_y(e2)
+    Re_z = rot_matrix_z(e3)
+    r, p, y = euler_from_quaternion(test_case[0][1])
+    Rrpy = (Re_z * Re_y * Re_x * R_corr).evalf(subs={e1: r, e2: p, e3: y})
     
     theta1 = 0
     theta2 = 0
