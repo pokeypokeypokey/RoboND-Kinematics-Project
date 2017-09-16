@@ -34,6 +34,21 @@ def DH_transform_matrix(alpha, a, d, q):
                    [ sin(q)*sin(alpha), cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
                    [                 0,                 0,           0,             1]])
 
+def rot_matrix_x(theta):
+    return Matrix([[ 1,           0,           0         ],
+                   [ 0,           cos(theta), -sin(theta)],
+                   [ 0,           sin(theta),  cos(theta)]])
+
+def rot_matrix_y(theta):
+    return Matrix([[ cos(theta),  0,           sin(theta)],
+                   [ 0,           1,           0         ],
+                   [-sin(theta),  0,           cos(theta)]])
+
+def rot_matrix_z(theta):
+    return Matrix([[ cos(theta), -sin(theta),  0],
+                   [ sin(theta),  cos(theta),  0],
+                   [ 0,           0,           1]])
+
 def test_code(test_case):
     ## Set up code
     ## Do not modify!
