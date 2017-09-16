@@ -26,6 +26,12 @@ test_cases = {1:[[[2.16135,-1.42635,1.55109],
               5:[]}
 
 
+def DH_transform_matrix(alpha, a, d, q):
+    return Matrix([[            cos(q),           -sin(q),           0,             a],
+                   [ sin(q)*cos(alpha), cos(q)*cos(alpha), -sin(alpha), -sin(alpha)*d],
+                   [ sin(q)*sin(alpha), cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
+                   [                 0,                 0,           0,             1]])
+
 def test_code(test_case):
     ## Set up code
     ## Do not modify!
