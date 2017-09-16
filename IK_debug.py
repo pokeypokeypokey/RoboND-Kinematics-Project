@@ -1,7 +1,9 @@
-from sympy import *
 from time import time
 from mpmath import radians
 import tf
+from tf.transformations import euler_from_quaternion
+from sympy import symbols, cos, acos, sin, asin, atan, atan2, sqrt, simplify, pi
+from sympy.matrices import Matrix
 
 '''
 Format of test case is [ [[EE position],[EE orientation as quaternions]],[WC location],[joint angles]]
@@ -25,6 +27,12 @@ test_cases = {1:[[[2.16135,-1.42635,1.55109],
               4:[],
               5:[]}
 
+
+def DH_transform_matrix(alpha, a, d, q):
+    return Matrix([[            cos(q),           -sin(q),           0,             a],
+                   [ sin(q)*cos(alpha), cos(q)*cos(alpha), -sin(alpha), -sin(alpha)*d],
+                   [ sin(q)*sin(alpha), cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
+                   [                 0,                 0,           0,             1]])
 
 def test_code(test_case):
     ## Set up code
@@ -58,11 +66,38 @@ def test_code(test_case):
 
     req = Pose(comb)
     start_time = time()
-    
-    ########################################################################################
-    ## 
 
-    ## Insert IK code here!
+    # Create symbols
+    q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
+    d1, d2, d3, d4, d5, d6, d7 = symbols('d1:8')
+    a0, a1, a2, a3, a4, a5, a6 = symbols('a0:7')
+    alpha0, alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = symbols('alpha0:7')
+
+    # Define Modified DH Transformation matrix
+    s = {alpha0: 0,          a0: 0,      d1: 0.75,   q1: q1,
+         alpha1: -(pi/2.),   a1: 0.35,   d2: 0,      q2: q2 - (pi/2.),
+         alpha2: 0,          a2: 1.25,   d3: 0,      q3: q3,
+         alpha3: -(pi/2.),   a3: -0.054, d4: 1.5,    q4: q4,
+         alpha4:  (pi/2.),   a4: 0,      d5: 0,      q5: q5,
+         alpha5: -(pi/2.),   a5: 0,      d6: 0,      q6: q6,
+         alpha6: 0,          a6: 0,      d7: 0.303,  q7: 0}
+    
+    # Create individual transformation matrices
+    T0_1 = DH_transform_matrix(alpha0, a0, d1, q1).subs(s)
+    T1_2 = DH_transform_matrix(alpha1, a1, d2, q2).subs(s)
+    T2_3 = DH_transform_matrix(alpha2, a2, d3, q3).subs(s)
+    T3_4 = DH_transform_matrix(alpha3, a3, d4, q4).subs(s)
+    T4_5 = DH_transform_matrix(alpha4, a4, d5, q5).subs(s)
+    T5_6 = DH_transform_matrix(alpha5, a5, d6, q6).subs(s)
+    T6_G = DH_transform_matrix(alpha6, a6, d7, q7).subs(s)
+
+    # Combined transforms
+    T0_2 = (T0_1 * T1_2) # base link to link 2
+    T0_3 = (T0_2 * T2_3) # base link to link 3
+    T0_4 = (T0_3 * T3_4) # base link to link 4
+    T0_5 = (T0_4 * T4_5) # base link to link 5
+    T0_6 = (T0_5 * T5_6) # base link to link 6
+    T_total = (T0_6 * T6_G) # base link to gripper
     
     theta1 = 0
     theta2 = 0
@@ -74,18 +109,15 @@ def test_code(test_case):
     ## 
     ########################################################################################
     
-    ########################################################################################
-    ## For additional debugging add your forward kinematics here. Use your previously calculated thetas
-    ## as the input and output the position of your end effector as your_ee = [x,y,z]
+    WC = T0_5.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
+                          q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
 
-    ## (OPTIONAL) YOUR CODE HERE!
-
-    ## End your code input for forward kinematics here!
-    ########################################################################################
+    EE = T_total.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
+                             q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
 
     ## For error analysis please set the following variables of your WC location and EE location in the format of [x,y,z]
-    your_wc = [1,1,1] # <--- Load your calculated WC values in this array
-    your_ee = [1,1,1] # <--- Load your calculated end effector value from your forward kinematics
+    your_wc = [WC[0, 3], WC[1, 3], WC[2, 3]] # <--- Load your calculated WC values in this array
+    your_ee = [EE[0, 3], EE[1, 3], EE[2, 3]] # <--- Load your calculated end effector value from your forward kinematics
     ########################################################################################
 
     ## Error analysis
