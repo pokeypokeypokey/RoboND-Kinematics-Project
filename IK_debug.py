@@ -132,10 +132,22 @@ def test_code(test_case):
     wx = px - (0 + 0.303)*Rrpy[0, 2]
     wy = py - (0 + 0.303)*Rrpy[1, 2]
     wz = pz - (0 + 0.303)*Rrpy[2, 2]
+
+    # Trig
+    wxy = sqrt(wx**2 + wy**2)
+    Bxy = wxy-0.35
+    Bz = wz-0.75
+    B = sqrt(Bxy**2 + Bz**2)
+    A = 1.50097     # sqrt(0.054**2 + 1.5**2)
+    C = 1.25
+    a = acos((B**2 + C**2 - A**2)/(2*B*C))
+    b = acos((A**2 + C**2 - B**2)/(2*A*C))
+    t3_offset = 0.03598     # atan(0.054/1.5)
     
-    theta1 = 0
-    theta2 = 0
-    theta3 = 0
+    theta1 = atan2(wy, wx)
+    theta2 = atan2(Bxy, Bz) - a
+    theta3 = pi/2. - b - t3_offset
+
     theta4 = 0
     theta5 = 0
     theta6 = 0
