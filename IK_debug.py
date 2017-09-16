@@ -64,11 +64,38 @@ def test_code(test_case):
 
     req = Pose(comb)
     start_time = time()
-    
-    ########################################################################################
-    ## 
 
-    ## Insert IK code here!
+    # Create symbols
+    q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
+    d1, d2, d3, d4, d5, d6, d7 = symbols('d1:8')
+    a0, a1, a2, a3, a4, a5, a6 = symbols('a0:7')
+    alpha0, alpha1, alpha2, alpha3, alpha4, alpha5, alpha6 = symbols('alpha0:7')
+
+    # Define Modified DH Transformation matrix
+    s = {alpha0: 0,          a0: 0,      d1: 0.75,   q1: q1,
+         alpha1: -(pi/2.),   a1: 0.35,   d2: 0,      q2: q2 - (pi/2.),
+         alpha2: 0,          a2: 1.25,   d3: 0,      q3: q3,
+         alpha3: -(pi/2.),   a3: -0.054, d4: 1.5,    q4: q4,
+         alpha4:  (pi/2.),   a4: 0,      d5: 0,      q5: q5,
+         alpha5: -(pi/2.),   a5: 0,      d6: 0,      q6: q6,
+         alpha6: 0,          a6: 0,      d7: 0.303,  q7: 0}
+    
+    # Create individual transformation matrices
+    T0_1 = DH_transform_matrix(alpha0, a0, d1, q1).subs(s)
+    T1_2 = DH_transform_matrix(alpha1, a1, d2, q2).subs(s)
+    T2_3 = DH_transform_matrix(alpha2, a2, d3, q3).subs(s)
+    T3_4 = DH_transform_matrix(alpha3, a3, d4, q4).subs(s)
+    T4_5 = DH_transform_matrix(alpha4, a4, d5, q5).subs(s)
+    T5_6 = DH_transform_matrix(alpha5, a5, d6, q6).subs(s)
+    T6_G = DH_transform_matrix(alpha6, a6, d7, q7).subs(s)
+
+    # Combined transforms
+    T0_2 = (T0_1 * T1_2) # base link to link 2
+    T0_3 = (T0_2 * T2_3) # base link to link 3
+    T0_4 = (T0_3 * T3_4) # base link to link 4
+    T0_5 = (T0_4 * T4_5) # base link to link 5
+    T0_6 = (T0_5 * T5_6) # base link to link 6
+    T_total = (T0_6 * T6_G) # base link to gripper
     
     theta1 = 0
     theta2 = 0
