@@ -113,6 +113,11 @@ def test_code(test_case):
     T0_5 = (T0_4 * T4_5) # base link to link 5
     T0_6 = (T0_5 * T5_6) # base link to link 6
     T_total = (T0_6 * T6_G) # base link to gripper
+
+    # Gripper orientation correction
+    R_z = rot_matrix_z(pi)
+    R_y = rot_matrix_y(-pi/2.)
+    R_corr = (R_z * R_y)
     
     theta1 = 0
     theta2 = 0
