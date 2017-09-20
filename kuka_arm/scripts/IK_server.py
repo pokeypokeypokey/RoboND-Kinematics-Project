@@ -20,11 +20,10 @@ from sympy.matrices import Matrix
 from math import floor, pi
 
 pi_2 = pi/2.
-_TRACK_ERROR = False
 
 
 class IK_server(object):
-    def __init__(self):
+    def __init__(self, track_error=False):
         # initialize node and declare calculate_ik service
         rospy.init_node('IK_server')
         self.serv = rospy.Service('calculate_ik', CalculateIK, self.handle_calculate_IK)
@@ -65,6 +64,9 @@ class IK_server(object):
         R_y = self._rot_matrix_y(-pi_2)
         self.R_corr = (R_z * R_y)
 
+        # Flag for error tracking
+        self._TRACK_ERROR = track_error
+
         rospy.spin()
 
     def _DH_transform_matrix(self, alpha, a, d, q):
@@ -96,8 +98,15 @@ class IK_server(object):
         offset = angle + pi
         return (offset - (floor(offset/width)*width)) - pi
 
-    def _track_error(self):
-        pass
+    def _track_error(self, thetas, request_EE_xyz):
+        calc_EE = self.T_total.evalf(subs={q1: thetas[0], q2: thetas[1], q3: thetas[2], 
+                                           q4: thetas[3], q5: thetas[4], q6: thetas[5]})
+
+        error = sqrt((calc_EE[0,3] - request_EE_xyz[0])**2 
+                    + (calc_EE[1,3] - request_EE_xyz[1])**2 
+                    + (calc_EE[2,3] - request_EE_xyz[2])**2)
+
+        # publish error
 
     def handle_calculate_IK(self, req):
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -124,7 +133,8 @@ class IK_server(object):
      
             # Calculate joint angles using Geometric IK method
             # Final rotation
-            Rrpy = self._rot_matrix_x(yaw) * self._rot_matrix_x(pitch) * self._rot_matrix_x(roll) * self.R_corr
+            Rrpy = self._rot_matrix_x(yaw) * self._rot_matrix_x(pitch) \
+                    * self._rot_matrix_x(roll) * self.R_corr
 
             # Wrist center
             wx = px - (0 + 0.303)*Rrpy[0, 2]
@@ -161,8 +171,12 @@ class IK_server(object):
                 theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
             # Populate response for the IK request
-            joint_trajectory_point.positions = map(self._norm_angle, [theta1, theta2, theta3, theta4, theta5, theta6])
+            thetas = map(self._norm_angle, [theta1, theta2, theta3, theta4, theta5, theta6])
+            joint_trajectory_point.positions = thetas
             joint_trajectory_list.append(joint_trajectory_point)
+
+            if _TRACK_ERROR:
+                self._track_error(thetas, (px, py, pz))
 
         rospy.loginfo("length of Joint Trajectory List: %s" % len(joint_trajectory_list))
         return CalculateIKResponse(joint_trajectory_list)
