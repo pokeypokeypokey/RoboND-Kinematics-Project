@@ -33,7 +33,7 @@ Links | alpha(i-1) | a(i-1) | d(i)  | theta(i)
 
 Matrices generated with the following code:
 
-```
+```python
 from sympy import symbols, Matrix
 
 def DH_transform_matrix(alpha, a, d, q):
@@ -62,9 +62,17 @@ Theta 1 is calculated by projecting the wrist center (WC) onto the XY plane. It 
 
 
 
-Theta 2 & 3 are calculated by solving the following:
+Thetas 4, 5 & 6 are calculated by solving the following:
 
 ![params][theta456]
+
+Taking advantage of the trig rules `tan(x) = sin(x)/cos(x)` and `sin(x)**2 + cos(x)**2 = 1` allows the use of `atan`, which avoids quadrant issues:
+
+```python
+theta4 = atan2(r22, -r02)
+theta5 = atan2(sqrt(r10**2 + r11**2), r12)
+theta6 = atan2(-r11, r10)
+```
 
 ### Project Implementation
 
