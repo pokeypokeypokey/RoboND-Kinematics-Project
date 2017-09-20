@@ -14,12 +14,10 @@ import rospy
 import tf
 from kuka_arm.srv import *
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-# from std_msgs.msg import Float64
 from mpmath import *
 from sympy import symbols, cos, acos, sin, atan2, simplify, sqrt, pi
 from sympy.matrices import Matrix
 from math import floor, pi
-# import matplotlib.pyplot as plt
 
 pi_2 = pi/2.
 _TRACK_ERROR = False
@@ -102,8 +100,6 @@ class IK_server(object):
         pass
 
     def handle_calculate_IK(self, req):
-        target_pub = rospy.Publisher('/kuka_error_tracking/error', Float64, queue_size=10)
-
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
         if len(req.poses) < 1:
             print "No valid poses received"
