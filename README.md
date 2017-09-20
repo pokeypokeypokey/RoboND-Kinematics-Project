@@ -66,12 +66,33 @@ Thetas 4, 5 & 6 are calculated by solving the following:
 
 ![params][theta456]
 
+The right matrix was created with a composition rotation matrix from joint 3 to the end effector:
+
+```python
+R3_6_comp = simplify(T3_4[0:3, 0:3] * T4_5[0:3, 0:3] * T5_6[0:3, 0:3] * T6_G[0:3,0:3])
+```
+
 Taking advantage of the trig rules `tan(x) = sin(x)/cos(x)` and `sin(x)**2 + cos(x)**2 = 1` allows the use of `atan`, which avoids quadrant issues:
 
 ```python
 theta4 = atan2(r22, -r02)
 theta5 = atan2(sqrt(r10**2 + r11**2), r12)
 theta6 = atan2(-r11, r10)
+```
+
+The values of `rnm` in the left matrix come from substituting thetas 1-3 in the R0_3 composite rotation matrix, inverting that and multiplying by the final rotation matrix:
+
+```python
+R0_3 = (T0_3[0:3, 0:3]).evalf(subs={q1: theta1, q2: theta2, q3: theta3})
+R3_6 = R0_3.inv() * R_total
+```
+
+Where `R_total` was the final (target) rotation, including a correction factor:
+
+```python 
+R_corr   = rot_matrix_z(pi) * rot_matrix_y(-pi/2.)
+R_target = rot_matrix_z(target_yaw) * rot_matrix_y(target_pitch) * rot_matrix_x(target_roll)
+R_total = R_target * R_corr
 ```
 
 ### Project Implementation
