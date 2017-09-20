@@ -6,6 +6,7 @@
 
 [arm]: ./misc_images/arm.jpg
 [theta23]: ./misc_images/theta23.jpg
+[theta456]: ./misc_images/theta456.jpg
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
@@ -61,7 +62,9 @@ Theta 1 is calculated by projecting the wrist center (WC) onto the XY plane. It 
 
 
 
-Theta 2 & 3 are calculated 
+Theta 2 & 3 are calculated by solving the following:
+
+![params][arm]
 
 ### Project Implementation
 
