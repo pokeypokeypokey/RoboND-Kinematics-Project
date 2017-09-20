@@ -44,6 +44,9 @@ def rot_matrix_z(theta):
                    [ 0,           0,           1]])
 
 def norm_angle(angle):
+    """
+    Normalise angle between -pi and pi.
+    """
     width  = 2.*pi
     offset = angle + pi
     return (offset - (floor(offset/width)*width)) - pi
