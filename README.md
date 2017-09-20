@@ -78,7 +78,7 @@ Thetas 4, 5 & 6 are calculated by solving the following:
 The right matrix was created with a composition rotation matrix from joint 3 to the end effector:
 
 ```python
-R3_6_comp = simplify(T3_4[0:3, 0:3] * T4_5[0:3, 0:3] * T5_6[0:3, 0:3] * T6_G[0:3,0:3])
+R3_6_comp = simplify(T3_4[0:3, 0:3] * T4_5[0:3, 0:3] * T5_6[0:3, 0:3] * T6_G[0:3, 0:3])
 ```
 
 Taking advantage of the trig rules `tan(x) = sin(x)/cos(x)` and `sin(x)**2 + cos(x)**2 = 1` allows the use of `atan`, which avoids quadrant issues:
