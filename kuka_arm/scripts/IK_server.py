@@ -52,10 +52,14 @@ class IK_server(object):
         T0_1 = self._DH_transform_matrix(alpha0, a0, d1, q1).subs(s)
         T1_2 = self._DH_transform_matrix(alpha1, a1, d2, q2).subs(s)
         T2_3 = self._DH_transform_matrix(alpha2, a2, d3, q3).subs(s)
+        T3_4 = self._DH_transform_matrix(alpha3, a3, d4, q4).subs(s)
+        T4_5 = self._DH_transform_matrix(alpha4, a4, d5, q5).subs(s)
+        T5_6 = self._DH_transform_matrix(alpha5, a5, d6, q6).subs(s)
+        T6_G = self._DH_transform_matrix(alpha6, a6, d7, q7).subs(s)
 
         # Combined transforms
-        T0_2 = (T0_1 * T1_2) # base link to link 2
-        self.T0_3 = (T0_2 * T2_3) # base link to link 3
+        self.T0_3 = (T0_1 * T1_2 * T2_3) # base link to link 3
+        self.T_total = (self.T0_3 * T3_4 * T4_5 * T5_6 * T6_G) # base link to gripper
 
         # Extract rotation matrices from the transformation matrices
         # Gripper orientation correction
