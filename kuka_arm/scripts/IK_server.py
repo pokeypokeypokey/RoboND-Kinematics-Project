@@ -18,6 +18,7 @@ from geometry_msgs.msg import Pose
 from mpmath import *
 from sympy import symbols, cos, acos, sin, atan2, simplify, sqrt, pi
 from sympy.matrices import Matrix
+from math import floor, pi
 
 pi_2 = pi/2.
 
@@ -42,6 +43,10 @@ def rot_matrix_z(theta):
                    [ sin(theta),  cos(theta),  0],
                    [ 0,           0,           1]])
 
+def norm_angle(angle):
+    width  = 2.*pi
+    offset = angle + pi
+    return (offset - (floor(offset/width)*width)) - pi
 
 def handle_calculate_IK(req):
     rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -131,12 +136,16 @@ def handle_calculate_IK(req):
         # R3_6 = R0_3.inv() * Rrpy
         R3_6 = R0_3.transpose() * Rrpy  # Note transpose equivalent and faster than inverse
 
-        theta4 = atan2(R3_6[2,2], -R3_6[0,2])
         theta5 = atan2(sqrt(R3_6[1,0]**2 + R3_6[1,1]**2), R3_6[1,2])
-        theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+        if sin(theta5) < 0:
+            theta4 = atan2(-R3_6[2,2], R3_6[0,2])
+            theta6 = atan2(R3_6[1,1], -R3_6[1,0])
+        else:
+            theta4 = atan2(R3_6[2,2], -R3_6[0,2])
+            theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
         # Populate response for the IK request
-        joint_trajectory_point.positions = [theta1, theta2, theta3, theta4, theta5, theta6]
+        joint_trajectory_point.positions = map(norm_angle, [theta1, theta2, theta3, theta4, theta5, theta6])
         joint_trajectory_list.append(joint_trajectory_point)
 
     rospy.loginfo("length of Joint Trajectory List: %s" % len(joint_trajectory_list))

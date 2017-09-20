@@ -17,7 +17,7 @@
 
 ![params][arm]
 
-DH parameters (from .xacro file)
+DH parameters (from `.xacro` file)
 
 Links | alpha(i-1) | a(i-1) | d(i)  | theta(i)
 ---   | ---        | ---    | ---   | ---
@@ -80,7 +80,7 @@ theta5 = atan2(sqrt(r10**2 + r11**2), r12)
 theta6 = atan2(-r11, r10)
 ```
 
-The values of `rnm` in the left matrix come from substituting thetas 1-3 in the R0_3 composite rotation matrix, inverting that and multiplying by the final rotation matrix:
+The values of `rnm` in the left matrix come from substituting thetas 1-3 in the `R0_3` composite rotation matrix, inverting that and multiplying by the final rotation matrix:
 
 ```python
 R0_3 = (T0_3[0:3, 0:3]).evalf(subs={q1: theta1, q2: theta2, q3: theta3})
@@ -99,6 +99,6 @@ R_total = R_target * R_corr
 
 #### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
-![alt text][image3]
+
 
 

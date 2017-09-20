@@ -4,6 +4,7 @@ import tf
 from tf.transformations import euler_from_quaternion
 from sympy import symbols, cos, acos, sin, asin, atan, atan2, sqrt, simplify, pi
 from sympy.matrices import Matrix
+# from math import floor, pi
 
 '''
 Format of test case is [ [[EE position],[EE orientation as quaternions]],[WC location],[joint angles]]
@@ -148,6 +149,9 @@ def test_code(test_case):
     theta2 = atan2(Bxy, Bz) - a
     theta3 = pi/2. - b - t3_offset
 
+    print test_case[2][0], test_case[2][1], test_case[2][2]
+    print theta1, theta2, theta3
+
     # Extract rotation matrices from the transformation matrices
     R0_3 = (T0_3[0:3, 0:3]).evalf(subs={q1: theta1, q2: theta2, q3: theta3})
     # R3_6 = R0_3.inv() * Rrpy
@@ -161,14 +165,17 @@ def test_code(test_case):
     theta5 = atan2(sqrt(R3_6[1,0]**2 + R3_6[1,1]**2), R3_6[1,2])
     theta6 = atan2(-R3_6[1,1], R3_6[1,0])
 
+    print test_case[2][3], test_case[2][4], test_case[2][5]
+    print theta4, theta5, theta6
+
     ## 
     ########################################################################################
     
-    WC = T0_5.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
-                          q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
+    WC = T0_5.evalf(subs={q1: theta1, q2: theta2, q3: theta3, 
+                          q4: theta4, q5: theta5, q6: theta6})
 
-    EE = T_total.evalf(subs={q1: test_case[2][0], q2: test_case[2][1], q3: test_case[2][2], 
-                             q4: test_case[2][3], q5: test_case[2][4], q6: test_case[2][5]})
+    EE = T_total.evalf(subs={q1: theta1, q2: theta2, q3: theta3, 
+                             q4: theta4, q5: theta5, q6: theta6})
 
     ## For error analysis please set the following variables of your WC location and EE location in the format of [x,y,z]
     your_wc = [WC[0, 3], WC[1, 3], WC[2, 3]] # <--- Load your calculated WC values in this array
@@ -223,6 +230,6 @@ def test_code(test_case):
 
 if __name__ == "__main__":
     # Change test case number for different scenarios
-    test_case_number = 1
+    test_case_number = 3
 
     test_code(test_cases[test_case_number])
