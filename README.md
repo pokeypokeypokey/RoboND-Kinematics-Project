@@ -5,6 +5,7 @@
 [//]: # (Image References)
 
 [arm]: ./misc_images/arm.jpg
+[theta23]: ./misc_images/theta23.jpg
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
@@ -40,22 +41,27 @@ def DH_transform_matrix(alpha, a, d, q):
                    [ sin(q)*sin(alpha), cos(q)*sin(alpha),  cos(alpha),  cos(alpha)*d],
                    [                 0,                 0,           0,             1]])
 
-q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
-T0_1 = DH_transform_matrix( 0,     0,      0.75,  q1)
-T1_2 = DH_transform_matrix(-pi/2,  0.35,   0,     q2)
-T2_3 = DH_transform_matrix( 0,     1.25,   0,     q3)
-T3_4 = DH_transform_matrix(-pi/2, -0.054,  1.5,   q4)
-T4_5 = DH_transform_matrix( pi/2,  0,      0,     q5)
-T5_6 = DH_transform_matrix(-pi/2,  0,      0,     q6)
-T6_G = DH_transform_matrix( 0,     0,      0.303, 0)
+q1, q2, q3, q4, q5, q6 = symbols('q1:7')
+T0_1  = DH_transform_matrix( 0,     0,      0.75,  q1)
+T1_2  = DH_transform_matrix(-pi/2,  0.35,   0,     q2)
+T2_3  = DH_transform_matrix( 0,     1.25,   0,     q3)
+T3_4  = DH_transform_matrix(-pi/2, -0.054,  1.5,   q4)
+T4_5  = DH_transform_matrix( pi/2,  0,      0,     q5)
+T5_6  = DH_transform_matrix(-pi/2,  0,      0,     q6)
+T6_EE = DH_transform_matrix( 0,     0,      0.303, 0)
 
-T_total = T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6 * T6_G
+T_total = T0_1 * T1_2 * T2_3 * T3_4 * T4_5 * T5_6 * T6_EE
 ```
 
 #### 3. Decouple Inverse Kinematics problem into Inverse Position Kinematics and inverse Orientation Kinematics; doing so derive the equations to calculate all individual joint angles.
  
+The wrist center is chosen at joint 5 (see image above). The first three joints (i.e. thetas 1-3) are used to move the wrist center to the correct position (inverse position kinematics) and the last three joints (i.e. thetas 4-6) are used to orient the end effector (inverse orientation kinematics).
 
-![alt text][image2]
+Theta 1 is calculated by projecting the wrist center (WC) onto the XY plane. It can then be solved with `atan2(WCy, WCx)`.
+
+
+
+Theta 2 & 3 are calculated 
 
 ### Project Implementation
 
