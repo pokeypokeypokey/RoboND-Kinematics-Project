@@ -6,7 +6,7 @@
 
 [arm]: ./misc_images/arm.jpg
 [theta23]: ./misc_images/theta23.jpg
-[theta456]: ./misc_images/theta456.jpg
+[theta456]: ./misc_images/theta456.gif
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
