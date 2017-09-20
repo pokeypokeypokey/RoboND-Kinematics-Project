@@ -63,7 +63,13 @@ The wrist center is chosen at joint 5 (see image above). The first three joints 
 
 Theta 1 is calculated by projecting the wrist center (WC) onto the XY plane. It can then be solved with `atan2(WCy, WCx)`.
 
+Theta 2 is calculated by constructing a triangle between joint 2, joint 3 and the wrist center, as shown below:
 
+![params][theta23]
+
+The lengths of the sides are known, and the angles can be solved with the cosine law. Theta 2 plus `a` is `atan2(Bxy, Bz)` where `Bxy` and `Bz` are the components of `B` projected onto the xy plane and the z axis respectively. `a` can then be subtracted to get theta 2.
+
+Theta 3 is simply `pi/2` minus `b`, with a constant offset to account for the offset between link 3 and 4.
 
 Thetas 4, 5 & 6 are calculated by solving the following:
 
@@ -122,5 +128,5 @@ Fetching a cylinder:
 Dropping cylinder in the bucket:
 ![params][drop]
 
-When the place accuracy is a bit too good! 
+When the placement accuracy is a bit too good and the bucket fills prematurely :P 
 ![params][final]
