@@ -14,6 +14,7 @@ import rospy
 import tf
 from kuka_arm.srv import *
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from std_msgs.msg import Float64
 from mpmath import *
 from sympy import symbols, cos, acos, sin, atan2, simplify, sqrt, pi
 from sympy.matrices import Matrix
@@ -65,7 +66,8 @@ class IK_server(object):
         self.R_corr = (R_z * R_y)
 
         # Flag for error tracking
-        self._TRACK_ERROR = track_error
+        self.TRACK_ERROR = track_error
+        self.error_pub = rospy.Publisher('/kuka_arm/EE_error', Float64, queue_size=10)
 
         rospy.spin()
 
@@ -107,6 +109,7 @@ class IK_server(object):
                     + (calc_EE[2,3] - request_EE_xyz[2])**2)
 
         # publish error
+        self.error_pub.publish(error)
 
     def handle_calculate_IK(self, req):
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -117,6 +120,7 @@ class IK_server(object):
         # Initialize service response
         joint_trajectory_list = []
         for x in xrange(0, len(req.poses)):
+            print "derp"
             # IK code starts here
             joint_trajectory_point = JointTrajectoryPoint(req.poses[x])
 
@@ -175,7 +179,7 @@ class IK_server(object):
             joint_trajectory_point.positions = thetas
             joint_trajectory_list.append(joint_trajectory_point)
 
-            if _TRACK_ERROR:
+            if self.TRACK_ERROR:
                 self._track_error(thetas, (px, py, pz))
 
         rospy.loginfo("length of Joint Trajectory List: %s" % len(joint_trajectory_list))
