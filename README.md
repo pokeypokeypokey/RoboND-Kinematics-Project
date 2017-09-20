@@ -7,6 +7,9 @@
 [arm]: ./misc_images/arm.jpg
 [theta23]: ./misc_images/theta23.jpg
 [theta456]: ./misc_images/theta456.gif
+[fetch]: ./misc_images/fetch.png
+[drop]: ./misc_images/drop.png
+[final]: ./misc_images/final.png
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
@@ -99,7 +102,7 @@ R_total = R_target * R_corr
 
 #### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
-Inverse kinematics were implemented as described with only minor adjustments. All angles were normalised between `-pi` and `pi` to try minimise rotations. Also, theta 4 & 6 calculations were adjust as follows (to keep them in the appropriate quadrants):
+Inverse kinematics calculations were implemented as described with only minor adjustments. All angles were normalised between `-pi` and `pi` to try minimise rotations. Also, theta 4 & 6 calculations were adjusted as follows (to keep them in the appropriate quadrants):
 
 ```python
 if sin(theta5) < 0:
@@ -111,3 +114,13 @@ else:
 ```
 
 Finally, to take advantage of the fact that `R0_3` is orthogonal, the transpose was used to calculated the inverse, which is much faster and more reliable.
+
+##### Results
+Fetching a cylinder:
+![params][fetch]
+
+Dropping cylinder in the bucket:
+![params][drop]
+
+When the place accuracy is a bit too good! 
+![params][final]
