@@ -64,7 +64,7 @@ Theta 1 is calculated by projecting the wrist center (WC) onto the XY plane. It 
 
 Theta 2 & 3 are calculated by solving the following:
 
-![params][arm]
+![params][theta456]
 
 ### Project Implementation
 
