@@ -24,7 +24,7 @@ pi_2 = pi/2.
 
 
 class IK_server(object):
-    def __init__(self, track_error=False):
+    def __init__(self, track_error=True):
         # initialize node and declare calculate_ik service
         rospy.init_node('IK_server')
         self.serv = rospy.Service('calculate_ik', CalculateIK, self.handle_calculate_IK)
@@ -101,6 +101,7 @@ class IK_server(object):
         return (offset - (floor(offset/width)*width)) - pi
 
     def _track_error(self, thetas, request_EE_xyz):
+        q1, q2, q3, q4, q5, q6, q7 = symbols('q1:8')
         calc_EE = self.T_total.evalf(subs={q1: thetas[0], q2: thetas[1], q3: thetas[2], 
                                            q4: thetas[3], q5: thetas[4], q6: thetas[5]})
 
@@ -109,7 +110,8 @@ class IK_server(object):
                     + (calc_EE[2,3] - request_EE_xyz[2])**2)
 
         # publish error
-        self.error_pub.publish(error)
+        print error
+        # self.error_pub.publish(error)
 
     def handle_calculate_IK(self, req):
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -120,9 +122,8 @@ class IK_server(object):
         # Initialize service response
         joint_trajectory_list = []
         for x in xrange(0, len(req.poses)):
-            print "derp"
             # IK code starts here
-            joint_trajectory_point = JointTrajectoryPoint(req.poses[x])
+            joint_trajectory_point = JointTrajectoryPoint()
 
             # Extract end-effector position and orientation from request
             # px,py,pz = end-effector position
