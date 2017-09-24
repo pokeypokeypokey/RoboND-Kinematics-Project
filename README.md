@@ -109,7 +109,9 @@ R_total = R_target * R_corr
 
 #### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
-Inverse kinematics calculations were implemented as described with only minor adjustments. The node was converted to a class so that the transforms could be pre-calculated on node startup. Thetas 4 and 6 were wrapped between `-pi` and `pi` to try minimise rotations. Finally, to take advantage of the fact that `R0_3` is orthogonal, the transpose was used to calculated the inverse, which is much faster and more reliable.
+The node was converted to a class so that the transforms could be pre-calculated on node startup.
+
+Inverse kinematics calculations were implemented as described with only minor adjustments:  Thetas 4 and 6 were wrapped between `-pi` and `pi` to try minimise rotations. Also, to take advantage of the fact that `R0_3` is orthogonal, the transpose was used to calculated the inverse, which is much faster and more reliable.
 
 ##### Results
 Fetching a cylinder:
