@@ -33,9 +33,9 @@ TrajectorySampler::TrajectorySampler(ros::NodeHandle nh)
 
   // set RRT as the planner and set allowed planning time
   move_group.setPlannerId("RRTkConfigDefault");
-  move_group.setPlanningTime(10.0);
+  move_group.setPlanningTime(15.0);
   eef_group.setPlannerId("RRTkConfigDefault");
-  eef_group.setPlanningTime(5.0);
+  eef_group.setPlanningTime(15.0);
 
   // Pointer to JointModelGroup for improved performance.
   joint_model_group =

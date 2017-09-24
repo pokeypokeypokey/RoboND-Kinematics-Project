@@ -16,15 +16,16 @@ from kuka_arm.srv import *
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from std_msgs.msg import Float64
 from mpmath import *
-from sympy import symbols, cos, acos, sin, atan2, simplify, sqrt, pi
+from sympy import symbols, simplify, sin, cos
 from sympy.matrices import Matrix
-from math import floor, pi
+from math import floor, pi, sqrt, atan2, acos, ceil
+from numpy import clip
 
 pi_2 = pi/2.
 
 
 class IK_server(object):
-    def __init__(self, track_error=True):
+    def __init__(self, track_error=False):
         # initialize node and declare calculate_ik service
         rospy.init_node('IK_server')
         self.serv = rospy.Service('calculate_ik', CalculateIK, self.handle_calculate_IK)
@@ -96,7 +97,7 @@ class IK_server(object):
         """
         Normalise angle between -pi and pi.
         """
-        width  = 2.*pi
+        width  = 2*pi
         offset = angle + pi
         return (offset - (floor(offset/width)*width)) - pi
 
@@ -110,8 +111,7 @@ class IK_server(object):
                     + (calc_EE[2,3] - request_EE_xyz[2])**2)
 
         # publish error
-        print error
-        # self.error_pub.publish(error)
+        self.error_pub.publish(error)
 
     def handle_calculate_IK(self, req):
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -121,6 +121,8 @@ class IK_server(object):
 
         # Initialize service response
         joint_trajectory_list = []
+        self.theta4 = self.theta6 = 0 # Track prev angle, to miminise rotations
+
         for x in xrange(0, len(req.poses)):
             # IK code starts here
             joint_trajectory_point = JointTrajectoryPoint()
@@ -153,8 +155,8 @@ class IK_server(object):
             B = sqrt(Bxy**2 + Bz**2)
             A = 1.50097     # sqrt(0.054**2 + 1.5**2)
             C = 1.25
-            a = acos((B**2 + C**2 - A**2)/(2*B*C))
-            b = acos((A**2 + C**2 - B**2)/(2*A*C))
+            a = acos(clip((B**2 + C**2 - A**2)/(2*B*C), -1, 1))
+            b = acos(clip((A**2 + C**2 - B**2)/(2*A*C), -1, 1))
             t3_offset = 0.03598     # atan(0.054/1.5)
 
             theta1 = atan2(wy, wx)
@@ -167,16 +169,12 @@ class IK_server(object):
             # R3_6 = R0_3.inv() * Rrpy
             R3_6 = R0_3.transpose() * Rrpy  # Note transpose equivalent and faster than inverse
 
+            theta4 = self._norm_angle(atan2(R3_6[2,2], -R3_6[0,2]))
             theta5 = atan2(sqrt(R3_6[1,0]**2 + R3_6[1,1]**2), R3_6[1,2])
-            if sin(theta5) < 0:
-                theta4 = atan2(-R3_6[2,2], R3_6[0,2])
-                theta6 = atan2(R3_6[1,1], -R3_6[1,0])
-            else:
-                theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-                theta6 = atan2(-R3_6[1,1], R3_6[1,0])
+            theta6 = self._norm_angle(atan2(-R3_6[1,1], R3_6[1,0]))
 
             # Populate response for the IK request
-            thetas = map(self._norm_angle, [theta1, theta2, theta3, theta4, theta5, theta6])
+            thetas = [theta1, theta2, theta3, theta4, theta5, theta6]
             joint_trajectory_point.positions = thetas
             joint_trajectory_list.append(joint_trajectory_point)
 
