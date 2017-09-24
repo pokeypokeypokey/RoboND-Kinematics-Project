@@ -14,12 +14,14 @@ import rospy
 import tf
 from kuka_arm.srv import *
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from std_msgs.msg import Float64
+# from std_msgs.msg import Float64
+from geometry_msgs.msg import Point
 from mpmath import *
 from sympy import symbols, simplify, sin, cos
 from sympy.matrices import Matrix
 from math import floor, pi, sqrt, atan2, acos, ceil
 from numpy import clip
+import matplotlib.pyplot as plt
 
 pi_2 = pi/2.
 
@@ -68,7 +70,10 @@ class IK_server(object):
 
         # Flag for error tracking
         self.TRACK_ERROR = track_error
-        self.error_pub = rospy.Publisher('/kuka_arm/EE_error', Float64, queue_size=10)
+        # self.error_pub = rospy.Publisher('/kuka_arm/EE_error', Point, queue_size=10)
+        if track_error:
+            plt.ion()
+            plt.show()
 
         rospy.spin()
 
@@ -106,12 +111,21 @@ class IK_server(object):
         calc_EE = self.T_total.evalf(subs={q1: thetas[0], q2: thetas[1], q3: thetas[2], 
                                            q4: thetas[3], q5: thetas[4], q6: thetas[5]})
 
-        error = sqrt((calc_EE[0,3] - request_EE_xyz[0])**2 
-                    + (calc_EE[1,3] - request_EE_xyz[1])**2 
-                    + (calc_EE[2,3] - request_EE_xyz[2])**2)
+        error = Point(calc_EE[0,3] - request_EE_xyz[0],
+                        calc_EE[1,3] - request_EE_xyz[1],
+                        calc_EE[2,3] - request_EE_xyz[2])
 
-        # publish error
-        self.error_pub.publish(error)
+        # # publish error
+        # self.error_pub.publish(error)
+        return error
+
+    def _plot_errors(self, error_list):
+        plt.gcf().clear() 
+        plt.plot([e.x for e in error_list], 'r')
+        plt.plot([e.y for e in error_list], 'g')
+        plt.plot([e.z for e in error_list], 'b')
+        plt.draw()
+        plt.pause(1e-5)
 
     def handle_calculate_IK(self, req):
         rospy.loginfo("Received %s eef-poses from the plan" % len(req.poses))
@@ -121,8 +135,7 @@ class IK_server(object):
 
         # Initialize service response
         joint_trajectory_list = []
-        self.theta4 = self.theta6 = 0 # Track prev angle, to miminise rotations
-
+        error_list = []
         for x in xrange(0, len(req.poses)):
             # IK code starts here
             joint_trajectory_point = JointTrajectoryPoint()
@@ -179,7 +192,10 @@ class IK_server(object):
             joint_trajectory_list.append(joint_trajectory_point)
 
             if self.TRACK_ERROR:
-                self._track_error(thetas, (px, py, pz))
+                error_list.append(self._track_error(thetas, (px, py, pz)))
+
+        if self.TRACK_ERROR:
+            self._plot_errors(error_list)
 
         rospy.loginfo("length of Joint Trajectory List: %s" % len(joint_trajectory_list))
         return CalculateIKResponse(joint_trajectory_list)
