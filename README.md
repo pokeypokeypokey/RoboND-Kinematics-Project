@@ -10,7 +10,7 @@
 [fetch]: ./misc_images/fetch.png
 [drop]: ./misc_images/drop.png
 [final]: ./misc_images/final.png
-[errors]: ./misc_images/error.png
+[errors]: ./misc_images/errors.png
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/972/view) Points
 
