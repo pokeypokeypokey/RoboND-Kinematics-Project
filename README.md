@@ -70,7 +70,7 @@ Theta 2 is calculated by constructing a triangle between joint 2, joint 3 and th
 
 The lengths of the sides are known, and the angles can be solved with the cosine law. Theta 2 plus `a` is `atan2(Bxy, Bz)` where `Bxy` and `Bz` are the components of `B` projected onto the xy plane and the z axis respectively. `a` can then be subtracted to get theta 2.
 
-Theta 3 is simply `pi/2` minus `b`, with a constant offset to account for the offset between link 3 and 4.
+Theta 3 is simply `pi/2` minus `b`, with a constant offset as indicated.
 
 Thetas 4, 5 & 6 are calculated by solving the following:
 
@@ -109,18 +109,7 @@ R_total = R_target * R_corr
 
 #### 1. Fill in the `IK_server.py` file with properly commented python code for calculating Inverse Kinematics based on previously performed Kinematic Analysis. Your code must guide the robot to successfully complete 8/10 pick and place cycles. Briefly discuss the code you implemented and your results. 
 
-Inverse kinematics calculations were implemented as described with only minor adjustments. All angles were normalised between `-pi` and `pi` to try minimise rotations. Also, theta 4 & 6 calculations were adjusted as follows (to keep them in the appropriate quadrants):
-
-```python
-if sin(theta5) < 0:
-    theta4 = atan2(-R3_6[2,2], R3_6[0,2])
-    theta6 = atan2(R3_6[1,1], -R3_6[1,0])
-else:
-    theta4 = atan2(R3_6[2,2], -R3_6[0,2])
-    theta6 = atan2(-R3_6[1,1], R3_6[1,0])
-```
-
-Finally, to take advantage of the fact that `R0_3` is orthogonal, the transpose was used to calculated the inverse, which is much faster and more reliable.
+Inverse kinematics calculations were implemented as described with only minor adjustments. The node was converted to a class so that the transforms could be pre-calculated on node startup. Thetas 4 and 6 were wrapped between `-pi` and `pi` to try minimise rotations. Finally, to take advantage of the fact that `R0_3` is orthogonal, the transpose was used to calculated the inverse, which is much faster and more reliable.
 
 ##### Results
 Fetching a cylinder:
@@ -131,3 +120,10 @@ Dropping cylinder in the bucket:
 
 When the placement accuracy is a bit too good and the bucket fills prematurely :P 
 ![params][final]
+
+##### Plotting EE error
+To get the EE error, the full EE transform was applied to the calculated joint angles. The resulting position was then compared to the request, and the difference plotted:
+
+![params][errors]
+
+The red, green and blue traces show the errors in x, y and z end effector locations respectively, as the arm moved from the start position to the position shown.
