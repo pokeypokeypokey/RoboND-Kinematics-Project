@@ -128,4 +128,4 @@ To get the EE error, the full EE transform was applied to the calculated joint a
 
 ![params][errors]
 
-The red, green and blue traces show the errors in x, y and z end effector locations respectively, as the arm moved from the start position to the position shown.
+The red, green and blue traces show the errors in x, y and z end effector locations respectively, as the arm moved from the start position to the position shown. Plotting is activated by setting `track_error` to true in the node initialisation. It's switched off by default since it's quite slow.
